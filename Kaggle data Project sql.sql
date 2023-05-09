@@ -37,17 +37,19 @@ Q4) Fetch the total no. of sports played in each olympic games.
       select * from t2
       order by no_of_sports desc;
 	  
-Q5)Fetch oldest athletes to win a gold medal
+Q5)Write SQL query to fetch the top 5 athletes who won the most Olympics gold medal.
 
-    with temp as
-            (select name,sex,cast(case when age = 'NA' then '0' else age end as int) as age
-              ,team,games,city,sport, event, medal
-            from olympics_history),
-        ranking as
-            (select *, rank() over(order by age desc) as rnk
-            from temp
-            where medal='Gold')
-    select *
-    from ranking
-    where rnk = 1; 
+   with t1 as
+            (select name, team, count(1) as total_gold_medals
+            from olympics_history
+            where medal = 'Gold'
+            group by name, team
+            order by total_gold_medals desc),
+        t2 as
+            (select *, dense_rank() over (order by total_gold_medals desc) as rnk
+            from t1)
+    select name, team, total_gold_medals
+    from t2
+    where rnk <= 5;
+
 
